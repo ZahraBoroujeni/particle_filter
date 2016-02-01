@@ -1,2 +1,2 @@
 # particle_filter
-using visula marker for localization
+using visual marker for localization
