@@ -24,6 +24,8 @@ http://www.havisys.com
 #ifndef particle_filter_h
 #define particle_fileter_h
 #include <cmath>
+#include <ros/ros.h>
+
 
 
 #define NUMPARTS 60
@@ -32,6 +34,7 @@ http://www.havisys.com
 #define IMHEIGHT 23
 #define MAX_COLOR 4
 #define MAX_NUM 1
+#define MAX_OBJECT 16
 
 // The basic vector
 
@@ -40,39 +43,27 @@ http://www.havisys.com
 
 class particle_filter
 {
-public:
-
-  ros::NodeHandle priv_nh_;
-    std::string serial_port_;
-    int baud_rate_;
-    std::string result;
-    size_t bytes_wrote;
-    int debug;
-    
-    serial::Serial link;
-
-  particle_filter();
-  ~particle_fileter();
-private:
-  struct Particle{
+  uint8_t markers_map[MAX_COLOR][MAX_NUM][2]={{{1,1}},{{1,100}},{{100,1}},{{100,100}}};
+  struct Particle
+  {
     double v[3];
     uint8_t ch,hits;
     uint16_t bel;
   };
-
+ 
   Particle parts[NUMPARTS];
-  int model[MAX_COLOR][MAX_NUM][2] = { 
-                                               {{1,1}}, 
-                                               {{1,100}},
-                                               {{100,1}},
-                                               {{100,100}} 
-                                             };
-  void resample ();
-  void initParticles();
-  void evalParticle(struct Particle* pt);
+
+public:
+    particle_filter();
+  ~particle_filter(){};
+
   void initParticle(struct Particle* pt);
   void mutateParticle(struct Particle* pt , struct Particle* ptsrc);
-  void transform(struct Particle* pt, uint32_t x, uint32_t y, uint8_t* xi, uint8_t* yi);
+  void transform(struct Particle* pt, uint8_t x, uint8_t y, uint8_t* xi, uint8_t* yi);
+  void evalParticle(struct Particle* pt,uint32_t image_markers[MAX_OBJECT][3]);
+  void resample ();
+  void evalParticles(uint32_t image_markers[MAX_OBJECT][3]);
+ 
 
 
 

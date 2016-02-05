@@ -2,9 +2,19 @@ cmake_minimum_required(VERSION 2.8.3)
 project(particle_filter_ros)
 
 find_package(catkin REQUIRED roscpp serial havimo_ros)
-find_package(serial REQUIRED)
+find_package(havimo_ros REQUIRED)
 
-catkin_package()
+###################################
+## catkin specific configuration ##
+###################################
+## The catkin_package macro generates cmake config files for your package
+## Declare things to be passed to dependent projects
+## INCLUDE_DIRS: uncomment this if you package contains header files
+## LIBRARIES: libraries you create in this project that dependent projects also need
+## CATKIN_DEPENDS: catkin_packages dependent projects also need
+## DEPENDS: system dependencies of this project that dependent projects also need
+catkin_package(
+	LIBRARIES ${PROJECT_NAME})
 
 ###########
 ## Build ##

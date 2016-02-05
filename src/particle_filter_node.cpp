@@ -1,36 +1,36 @@
-#include <havimo.h>
 #include <ros/ros.h>
 #include "particle_filter.h"
+#include <stdio.h>
+#include <stdlib.h>
 
+particle_filter PF;
+
+
+void estimate_position(const havimo_ros::CatArray::ConstPtr& havimo_output)
+{
+  ROS_INFO("I heard: [%d]", havimo_output[1].sumX);
+  uint32_t img_t[MAX_OBJECT][3];
+  for (int i;i<sizeof(havimo_output);i++)
+  {
+    img_t[i][0]=havimo_output[i].sumX/2;
+    img_t[i][1]=havimo_output[i].sumY/2;
+    img_t[i][2]=havimo_output[i].color/2;
+  }
+  //img_t=msg->data;
+  //PF.evalParticles(img_t);
   
+  //PF.resample();
+  
+
+}  
 int main(int argc, char **argv) 
 {
   ros::init(argc, argv, "particle_filter_node");
   ros::NodeHandle nh;
-  HaViMo module;
-  particle_filter PF;
-  
-  ros::spinOnce();  
+
+  ros::Subscriber sub = nh.subscribe("img_map", 1000, estimate_position);
   while(ros::ok())
   {
-    module.invokeRegion();
-    ros::Duration(0.5).sleep();
-    if (!module.waitForAck()) 
-      ROS_INFO("ERROR BY PING");
-    else {
-      Cat biggest;
-      // Find the biggest bounding box of the color num. 2
-      if (module.getBiggestObj(2,&biggest))
-      {
-      // Print the size and position of the object  
-        ROS_INFO("%d pixels in (%d,%d)",biggest.numPix,biggest.sumX / biggest.numPix,biggest.sumY / biggest.numPix);
-      }else
-      {
-        ROS_INFO("NO OBJ FOUND\n");
-      }  
-    }
-    PF.evalParticles();
-    PF.resample();
     ros::spinOnce();  
   }
   return 0;

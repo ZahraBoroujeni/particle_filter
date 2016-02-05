@@ -1,6 +1,10 @@
 
-void  particle_filter::particle_filter()
+#include "particle_filter.h"
+
+particle_filter::particle_filter()
 {
+  
+  
   for (int j = 0; j < NUMPARTS; j++)
     initParticle(parts + j); 
 
@@ -8,6 +12,7 @@ void  particle_filter::particle_filter()
 
 void particle_filter::initParticle(struct Particle* pt){
 
+  
   double min_x, max_x, min_y, max_y;
   min_x=0;
   min_y=64;
@@ -16,19 +21,19 @@ void particle_filter::initParticle(struct Particle* pt){
   srand48(time(NULL));
   pt->v[0] = min_x + drand48()*(max_x - min_x);
   pt->v[1]= min_y + drand48()*(max_y - min_y);
-  pt->v[2] = drand48()*2 * M_PI) - M_PI;
+  pt->v[2] = drand48()*2 * M_PI - M_PI;
   pt->ch = drand48()*2;
   pt->bel = 0;
 }
 
-void particle_filter::evalParticles(){
+void particle_filter::evalParticles(uint32_t image_markers[MAX_OBJECT][3]){
   for (int j = 0; j < NUMPARTS; j++)
-    evalParticle(parts + j);  
+    evalParticle(parts + j,image_markers);  
 }
 
 
 
-void particle_filter::evalParticle(struct Particle* pt,uint32_t image_x,uint32_t )
+void particle_filter::evalParticle(struct Particle* pt,uint32_t image_markers[MAX_OBJECT][3])
 {
   uint16_t sum = 0;
   uint8_t cnt = 0; 
@@ -37,10 +42,10 @@ void particle_filter::evalParticle(struct Particle* pt,uint32_t image_x,uint32_t
     for (int n = 0; n < MAX_NUM; n++)
     {
       uint8_t imx,imy;
-      transform(pt,image_x,image_y,&imx,&imy);
-      for (int object = 0; object < MAX_OBJECT; object++)
+      transform(pt,markers_map[color][n][0],markers_map[color][n][1],&imx,&imy);
+      for (int index = 0; index < MAX_OBJECT; index++)
       {
-        if ((imyx-img[color][object][x]<0.2)&&(imy-img[color][object][y]<0.2))
+        if ((image_markers[index][2]==color)&&(imx-image_markers[index][0]<0.2)&&(imy-image_markers[index][1]<0.2))
           sum += 1;
         else 
           sum += 5;
@@ -53,9 +58,9 @@ void particle_filter::evalParticle(struct Particle* pt,uint32_t image_x,uint32_t
   pt->bel = 256 * cnt / (sum*sum+1);
 }
 
-void particle_filter::transform(struct Particle* pt, uint32_t x, uint32_t y, double* xi, double* yi){
-  int xi_ = cos(pt->theta)*x-sin(pt->theta)*y+ pt->x;
-  int yi_ = sin(pt->theta)*x+cos(pt->theta)*y+ pt->y;
+void particle_filter::transform(struct Particle* pt, uint8_t x, uint8_t y, uint8_t* xi, uint8_t* yi){
+  int xi_ = cos(pt->v[2])*x-sin(pt->v[2])*y+ pt->v[0];
+  int yi_ = sin(pt->v[2])*x+cos(pt->v[2])*y+ pt->v[1];
 
   // if (xi_ > IMWIDTH) xi_ = IMWIDTH;
   // if (yi_ > IMHEIGHT) yi_ = IMHEIGHT;
@@ -74,7 +79,7 @@ void particle_filter::resample (){
     sumBelief += parts[j].bel;  
   uint32_t sum = 0;
   uint32_t lSum = 0;
-  uint32_t ptr = irand48(sumBelief);
+  uint32_t ptr = drand48()*(sumBelief);
   for (int j = 0; j < NUMPARTS; j++)
   {
     sum += (parts[j].bel) * MAX_RESAMPLED_PARTICLES;// * MAX_RESAMPLED_PARTICLES * 256 / (sumBelief/256);
@@ -115,8 +120,9 @@ void particle_filter::resample (){
   }
 }
 void particle_filter::mutateParticle(struct Particle* pt , struct Particle* ptsrc){
-  pt->x = ptsrc->x -2 + drand48()*5; 
-  pt->y = ptsrc->y -2 + drand48()*5; 
+  pt->v[0] = ptsrc->v[0] -2 + drand48()*5; 
+  pt->v[1] = ptsrc->v[1] -2 + drand48()*5; 
+  pt->v[3] = ptsrc->v[3] -2 + drand48()*5; 
   pt->ch = drand48()*2; 
   pt->bel = 0;
 }

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>havimo_ros</name>
+  <name>particle_filter_ros</name>
   <version>0.0.0</version>
-  <description>The havimo package</description>
+  <description>The particle filter package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
@@ -32,8 +32,12 @@
   <!-- Dependencies can be catkin packages or system dependencies -->
   <!-- Examples: -->
   <buildtool_depend>catkin</buildtool_depend>
+    <build_depend>geometry_msgs</build_depend>
   <build_depend>serial</build_depend>
+  <build_depend>havimo_ros</build_depend>
   <run_depend>serial</run_depend>
+    <run_depend>geometry_msgs</run_depend>
+  <run_depend>havimo_ros</run_depend>
 
 
 
